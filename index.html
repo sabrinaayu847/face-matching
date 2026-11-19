@@ -212,8 +212,9 @@ let hu = [
 for (let i = 0; i < 7; i++) {
     let val = hu[i];
     huVec[i] = val !== 0
-        ? Math.sign(val) * Math.log10(Math.abs(val))
+        ? -Math.sign(val) * Math.log10(Math.abs(val))
         : 0;
+}
 }
 
         }
