@@ -179,15 +179,43 @@
             };
 
             // Hitung 7 Momen Hu & Transformasi Logaritmik agar skala seimbang
-            let momen = cv.moments(konturUtama, false);
-            let hu = new cv.Mat();
-            cv.HuMoments(momen, hu);
-            for (let i = 0; i < 7; i++) {
-                let val = hu.doubleAt(i, 0);
-                // Log transform standar untuk menstabilkan rentang nilai Momen Hu
-                huVec[i] = val !== 0 ? -Math.sign(val) * Math.log10(Math.abs(val)) : 0;
-            }
-            hu.delete();
+            
+// Hitung 7 Momen Hu secara manual
+let momen = cv.moments(konturUtama, false);
+
+let n20 = momen.nu20;
+let n02 = momen.nu02;
+let n11 = momen.nu11;
+let n30 = momen.nu30;
+let n12 = momen.nu12;
+let n21 = momen.nu21;
+let n03 = momen.nu03;
+
+let a = n30 - 3 * n12;
+let b = 3 * n21 - n03;
+let c = n30 + n12;
+let d = n21 + n03;
+
+let hu = [
+    n20 + n02,
+    Math.pow(n20 - n02, 2) + 4 * Math.pow(n11, 2),
+    Math.pow(a, 2) + Math.pow(b, 2),
+    Math.pow(c, 2) + Math.pow(d, 2),
+    a * c * (Math.pow(c, 2) - 3 * Math.pow(d, 2)) +
+    b * d * (3 * Math.pow(c, 2) - Math.pow(d, 2)),
+    (n20 - n02) * (Math.pow(c, 2) - Math.pow(d, 2)) +
+    4 * n11 * c * d,
+    b * c * (Math.pow(c, 2) - 3 * Math.pow(d, 2)) -
+    a * d * (3 * Math.pow(c, 2) - Math.pow(d, 2))
+];
+
+for (let i = 0; i < 7; i++) {
+    let val = hu[i];
+    huVec[i] = val !== 0
+        ? Math.sign(val) * Math.log10(Math.abs(val))
+        : 0;
+}
+
         }
 
         // Bersihkan memori OpenCV (Wajib untuk mencegah memory leak)
